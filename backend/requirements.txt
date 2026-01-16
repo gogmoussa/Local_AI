@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+chromadb
+g4f
+ollama
+pydantic
+python-multipart
+websockets
+beautifulsoup4
+pytest
