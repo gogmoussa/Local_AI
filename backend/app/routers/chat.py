@@ -22,7 +22,7 @@ async def get_or_create_session(db: AsyncSession, session_id: str, first_message
         await db.commit()
     return session_id
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat")
 async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     try:
         user_content = request.messages[-1].content
@@ -45,8 +45,9 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
             
             # Save to Vector Memory
             await memory_service.add_interaction(request.session_id, user_content, response.message.content)
-            
-        return response
+        
+        # Return response as dict - must convert nested Pydantic models
+        return response.model_dump()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

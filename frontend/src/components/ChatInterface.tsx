@@ -211,7 +211,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 fontSize: '0.9rem',
                                 fontWeight: 500,
                                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
+                                opacity: selectedModel ? 1 : 0.7
                             }}
                         >
                             <div style={{
@@ -222,7 +223,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 boxShadow: `0 0 10px ${persona.color}`
                             }} />
                             <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {selectedModel}
+                                {selectedModel || 'Loading...'}
                             </span>
                             <ChevronDown size={16} style={{
                                 transform: showModelDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -251,36 +252,50 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                         padding: '0.5rem'
                                     }}
                                 >
-                                    {models.map(model => (
-                                        <button
-                                            key={model}
-                                            onClick={() => {
-                                                onModelChange(model);
-                                                setShowModelDropdown(false);
-                                            }}
-                                            style={{
-                                                width: '100%',
-                                                padding: '0.8rem 1rem',
-                                                textAlign: 'left',
-                                                border: 'none',
-                                                backgroundColor: model === selectedModel ? 'rgba(255,255,255,0.06)' : 'transparent',
-                                                color: model === selectedModel ? '#fff' : 'var(--text-dim)',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                borderRadius: '10px',
-                                                transition: 'all 0.2s',
-                                                fontWeight: model === selectedModel ? 600 : 400
-                                            }}
-                                            onMouseOver={(e) => {
-                                                if (model !== selectedModel) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
-                                            }}
-                                            onMouseOut={(e) => {
-                                                if (model !== selectedModel) e.currentTarget.style.backgroundColor = 'transparent';
-                                            }}
-                                        >
-                                            {model}
-                                        </button>
-                                    ))}
+                                    {models.length === 0 ? (
+                                        <div style={{
+                                            padding: '1rem',
+                                            textAlign: 'center',
+                                            color: 'var(--text-dim)',
+                                            fontSize: '0.85rem'
+                                        }}>
+                                            <p>No models available</p>
+                                            <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: 'var(--text-mute)' }}>
+                                                Make sure Ollama is running
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        models.map(model => (
+                                            <button
+                                                key={model}
+                                                onClick={() => {
+                                                    onModelChange(model);
+                                                    setShowModelDropdown(false);
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.8rem 1rem',
+                                                    textAlign: 'left',
+                                                    border: 'none',
+                                                    backgroundColor: model === selectedModel ? 'rgba(255,255,255,0.06)' : 'transparent',
+                                                    color: model === selectedModel ? '#fff' : 'var(--text-dim)',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.9rem',
+                                                    borderRadius: '10px',
+                                                    transition: 'all 0.2s',
+                                                    fontWeight: model === selectedModel ? 600 : 400
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    if (model !== selectedModel) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    if (model !== selectedModel) e.currentTarget.style.backgroundColor = 'transparent';
+                                                }}
+                                            >
+                                                {model}
+                                            </button>
+                                        ))
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>

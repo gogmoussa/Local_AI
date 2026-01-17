@@ -15,7 +15,7 @@ const PERSONAS = [
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [models, setModels] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-oss:20b');
+  const [selectedModel, setSelectedModel] = useState<string>('');
   const [selectedPersona, setSelectedPersona] = useState(PERSONAS[0]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>(uuidv4());
@@ -24,8 +24,19 @@ function App() {
   const refreshModels = async () => {
     const availableModels = await api.getModels();
     setModels(availableModels);
-    if (availableModels.length > 0 && !availableModels.includes(selectedModel)) {
-      setSelectedModel(availableModels[0]);
+    
+    // Set selectedModel to first available model, or keep current if still available
+    if (availableModels.length > 0) {
+      if (selectedModel && availableModels.includes(selectedModel)) {
+        // Keep current selection if it's still available
+        return;
+      } else {
+        // Set to first available model
+        setSelectedModel(availableModels[0]);
+      }
+    } else {
+      // No models available
+      setSelectedModel('');
     }
   };
 

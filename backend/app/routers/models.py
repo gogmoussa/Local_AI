@@ -1,20 +1,14 @@
 from fastapi import APIRouter
-import requests
+import logging
+from app.services.ollama_client import OllamaClient
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+ollama_client = OllamaClient()
 
 @router.get("/models")
 async def get_models():
     """Fetch available models from local Ollama instance."""
-    try:
-        # Use a short timeout to prevent hanging the UI
-        response = requests.get("http://localhost:11434/api/tags", timeout=5)
-        if response.status_code == 200:
-            models_data = response.json().get('models', [])
-            # Return model names sorted
-            names = sorted([model['name'] for model in models_data])
-            return names if names else ["gpt-oss:20b"]
-        return ["gpt-oss:20b"]
-    except Exception:
-        # Silently fallback to a safe model if Ollama is unreachable
-        return ["gpt-oss:20b"]
+    models = ollama_client.get_available_models()
+    logger.debug(f"Returning {len(models)} models: {models}")
+    return models

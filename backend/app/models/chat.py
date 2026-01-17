@@ -1,10 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 
 class Message(BaseModel):
     role: str
     content: str
     images: Optional[List[str]] = None # Base64 encoded images
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "role": "user",
+                "content": "Hello",
+                "images": None
+            }
+        }
 
 class ChatRequest(BaseModel):
     model: str = "gpt-oss:20b" # Defaulting to available model
@@ -24,3 +33,6 @@ class ChatResponse(BaseModel):
     prompt_eval_duration: Optional[int] = None
     eval_count: Optional[int] = None
     eval_duration: Optional[int] = None
+    
+    class Config:
+        from_attributes = True

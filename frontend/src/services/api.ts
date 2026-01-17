@@ -47,11 +47,27 @@ export const api = {
     getModels: async (): Promise<string[]> => {
         try {
             const response = await fetch(`${API_BASE_URL}/models`);
-            if (!response.ok) throw new Error('Failed to fetch models');
-            return await response.json();
+            if (!response.ok) {
+                console.error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+                const text = await response.text();
+                console.error("Response:", text);
+                throw new Error(`Failed to fetch models: ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log("Models fetched successfully:", data);
+            
+            // Ensure it's an array
+            if (Array.isArray(data)) {
+                return data;
+            } else if (data && typeof data === 'object' && 'models' in data) {
+                // In case the response is wrapped in a models object
+                return data.models;
+            }
+            console.warn("Unexpected response format:", data);
+            return data;
         } catch (error) {
             console.error("Failed to fetch models", error);
-            return ["gpt-oss:20b"]; // Fallback
+            return []; // Return empty array instead of fallback, let UI handle it
         }
     },
 
