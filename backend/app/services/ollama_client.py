@@ -6,22 +6,53 @@ class OllamaClient:
         self.client = ollama.Client(host=host)
 
     def chat(self, request: ChatRequest) -> ChatResponse:
-        response = self.client.chat(
-            model=request.model,
-            messages=[msg.model_dump() for msg in request.messages],
-            stream=request.stream
-        )
-        
-        if isinstance(response, dict):
-            return ChatResponse(**response)
-        
-        # If response is an object (e.g. Pydantic model from ollama library)
-        if hasattr(response, 'model_dump'):
-            return ChatResponse(**response.model_dump())
-        elif hasattr(response, 'dict'):
-             return ChatResponse(**response.dict())
-        else:
-             # Fallback
-             return ChatResponse(**vars(response))
+        try:
+            messages = []
+            for msg in request.messages:
+                m = msg.model_dump()
+                if not m.get('images'):
+                    del m['images'] # Ollama expects no images key if empty
+                messages.append(m)
 
-    # Future: Add streaming support if needed
+            response = self.client.chat(
+                model=request.model,
+                messages=messages,
+                stream=False
+            )
+            
+            if isinstance(response, dict):
+                return ChatResponse(**response)
+            
+            # If response is an object (e.g. Pydantic model from ollama library)
+            if hasattr(response, 'model_dump'):
+                return ChatResponse(**response.model_dump())
+            elif hasattr(response, 'dict'):
+                 return ChatResponse(**response.dict())
+            else:
+                 # Fallback
+                 return ChatResponse(**vars(response))
+        except Exception as e:
+            if "connection" in str(e).lower():
+                raise Exception("Ollama server is not responding. Please make sure Ollama is running.")
+            raise e
+
+    def chat_stream(self, request: ChatRequest):
+        """Generator for streaming responses."""
+        try:
+            messages = []
+            for msg in request.messages:
+                m = msg.model_dump()
+                if not m.get('images'):
+                    del m['images']
+                messages.append(m)
+
+            return self.client.chat(
+                model=request.model,
+                messages=messages,
+                stream=True
+            )
+        except Exception as e:
+            if "connection" in str(e).lower():
+                raise Exception("Ollama server is not responding. Please make sure Ollama is running.")
+            raise e
+

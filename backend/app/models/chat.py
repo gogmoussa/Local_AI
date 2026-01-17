@@ -4,11 +4,14 @@ from typing import List, Optional
 class Message(BaseModel):
     role: str
     content: str
+    images: Optional[List[str]] = None # Base64 encoded images
 
 class ChatRequest(BaseModel):
     model: str = "gpt-oss:20b" # Defaulting to available model
     messages: List[Message]
     stream: bool = False
+    session_id: Optional[str] = None
+
 
 class ChatResponse(BaseModel):
     model: str
